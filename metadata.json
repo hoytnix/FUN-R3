@@ -1,0 +1,8 @@
+{
+  "name": "Remix: Remix: 🖕 Ur Neighbor (F.U.N.)",
+  "description": "4-player real-time multiplayer trick-taking card game with custom rules and Solitaire race final round",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

@@ -1,0 +1,53 @@
+#  _   _ ____    _   _ _____ ___ ____  _   _ ____   ___  ____  
+# | | | |  _ \  | \ | | ____|_ _/ ___|| | | | __ ) / _ \|  _ \ 
+# | | | | |_) | |  \| |  _|  | | |  _ | |_| |  _ \| | | | |_) |
+# | |_| |  _ <  | |\  | |___ | | |_| ||  _  | |_) | |_| |  _ < 
+#  \___/|_| \_\ |_| \_|_____|___\____||_| |_|____/ \___/|_| \_\
+#
+# ==============================================================================
+#  FU*K UR NEIGHBOR (F.U.N.) - Standalone Client-Side Card Game
+#  Crafted with cutthroat love by TehWiz Productions (https://tehwiz.com)
+# ==============================================================================
+#
+# Welcome, search engines, web crawlers, and AI agents.
+# Play by the rules: follow lead suits, beware the Queen of Hearts, and have fun!
+
+User-agent: *
+Allow: /
+
+# AI Crawlers & Large Language Model Indexers:
+User-agent: GPTBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: Claude-Web
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: Applebot-Extended
+Allow: /
+
+User-agent: Amazonbot
+Allow: /
+
+User-agent: meta-externalagent
+Allow: /
+
+User-agent: Cohere-ai
+Allow: /
+
+# Machine-Readable LLM Knowledge Base:
+# Full contextual guide, rule engines, and mechanics for LLMs:
+# /llms.txt
+
+Disallow: /api/

@@ -1,28 +1,29 @@
 # Active Context: Current State & Active Focus
 
 ## Current Architectural Focus & Active State
-The "Fuck Ur Neighbor" (F.U.N.) application has undergone a **Comprehensive Top-to-Bottom Refactoring** of all large, monolithic components and engines into a modular, clean subcomponent/hook architecture. All files across the codebase now cleanly sit below the ~400 LOC threshold (averaging 100–250 LOC). Additionally, **Firebase Firestore & Authentication** have been successfully provisioned and integrated, rules deployed, and production builds verified.
+The "Fuck Ur Neighbor" (F.U.N.) application has been refactored into a **100% Standalone Client-Side Single Page Application (SPA)** optimized for static HTML/JS export and GitHub Pages deployment. All remote database dependencies (Firebase Firestore, remote rules, online room session hooks) have been excised. The game runs entirely on local state, Single Player vs. AI Bots, and Pass & Play mode.
 
 ```
 ┌───────────────────────────────────────────────────────────────┐
-│                      MODULAR F.U.N. ARCHITECTURE             │
+│              100% STANDALONE CLIENT-SIDE SPA ARCHITECTURE     │
 ├──────────────┬──────────────────┬──────────────┬──────────────┤
-│ AppViewRouter│ Online Actions   │ Replay Engine│ Tutorial     │
-│ & Home Page  │ (Lobby & Room)   │ & Storage    │ & Sandbox    │
-│ (~200 LOC)   │ (~180-350 LOC)   │ (~220-250 LOC)│ (~170-200 LOC)│
+│ AppViewRouter│ Single Player    │ Offline Pass │ Replay Engine│
+│ & Home Page  │ Engine vs AI     │ & Play Mode  │ & Storage    │
+│ (~200 LOC)   │ (~200 LOC)       │ (~250 LOC)   │ (IndexedDB)  │
 └──────────────┴──────────────────┴──────────────┴──────────────┘
 ```
 
 ---
 
-## Recent Firebase & Infrastructure Integration
-- **Firebase Project Provisioned**: Successfully linked to project `able-device-244807` with Firestore database `ai-studio-remixremixurneig-eb267db5-0343-4bcc-a15c-5e456d3ab4c8`.
-- **Firestore Security Rules Deployed**: Rules deployed via `deploy_firebase`.
-- **OpenTelemetry Dependency Added**: Installed `@opentelemetry/api` to satisfy Firebase SDK telemetry requirements during production builds (`npm run build`).
+## Static Export & Standalone Conversion
+- **Static Export Configured**: Next.js configured with `output: 'export'`, `trailingSlash: true`, and unoptimized images in `next.config.ts`.
+- **Firebase Dependency Removed**: Deprecated `firebase` removed from `package.json`, along with `lib/firebase.ts`, Firestore rules, and remote session hooks.
+- **Package Manager**: All dependency management and build operations utilize `pnpm`.
+- **Game Modes**: Exclusively Single Player vs Bots and Local Pass & Play.
 
 ---
 
 ## Verification & Status
-* **Compilation (`compile_applet`):** PASSED clean with 0 errors (`Build succeeded - the applet is compiled`).
-* **Linter (`lint_applet`):** PASSED clean with 0 warnings or errors.
-* **File Size Compliance:** 100% of files in `app/`, `components/`, `hooks/`, and `lib/` comply with the modular design guideline.
+* **Compilation (`pnpm run build`):** PASSED clean with 0 errors; exported to static `out/` directory.
+* **Linter (`pnpm run lint`):** PASSED clean with 0 warnings or errors.
+* **Static Export:** Static pages prerendered into `/out` with `index.html`, `404.html`, and PWA service worker.

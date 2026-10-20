@@ -1,36 +1,17 @@
-import type {NextConfig} from 'next';
+import type { NextConfig } from 'next';
+
+const basePath = process.env.NEXT_PUBLIC_BASE_PATH && process.env.NEXT_PUBLIC_BASE_PATH.trim() !== ''
+  ? process.env.NEXT_PUBLIC_BASE_PATH.trim()
+  : undefined;
 
 const nextConfig: NextConfig = {
-  reactStrictMode: true,
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
-  typescript: {
-    ignoreBuildErrors: false,
-  },
-  // Allow access to remote image placeholder.
+  output: 'export',
+  basePath,
   images: {
-    remotePatterns: [
-      {
-        protocol: 'https',
-        hostname: 'picsum.photos',
-        port: '',
-        pathname: '/**', // This allows any path under the hostname
-      },
-    ],
+    unoptimized: true,
   },
-  output: 'standalone',
-  transpilePackages: ['motion'],
-  webpack: (config, {dev}) => {
-    // HMR is disabled in AI Studio via DISABLE_HMR env var.
-    // Do not modifyâfile watching is disabled to prevent flickering during agent edits.
-    if (dev && process.env.DISABLE_HMR === 'true') {
-      config.watchOptions = {
-        ignored: /.*/,
-      };
-    }
-    return config;
-  },
+  // Ensure trailing slashes for GitHub Pages routing
+  trailingSlash: true,
 };
 
 export default nextConfig;

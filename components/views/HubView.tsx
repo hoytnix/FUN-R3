@@ -1,8 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Users, Bot, Smartphone, Download, Sparkles, History } from 'lucide-react';
-import { RoomState } from '@/lib/types';
+import { Bot, Smartphone, Download, Sparkles, History } from 'lucide-react';
 import { OfflineGameState } from '@/lib/offline-engine';
 import { HubModeCard } from '@/components/views/HubModeCard';
 
@@ -11,9 +10,8 @@ export type AppView =
   | 'SINGLE_PLAYER_SETUP'
   | 'SINGLE_PLAYER_GAME'
   | 'OFFLINE_SETUP'
-  | 'ONLINE_LOBBY'
   | 'GAME';
-export type GameMode = 'ONLINE' | 'SINGLE_PLAYER' | 'OFFLINE';
+export type GameMode = 'SINGLE_PLAYER' | 'OFFLINE';
 
 interface HubViewProps {
   pwaPrompt: any;
@@ -22,9 +20,7 @@ interface HubViewProps {
   offlineState: OfflineGameState | null;
   onResumeLocalMatch: () => void;
   onClearLocalSession: () => void;
-  room: RoomState | null;
   onSelectMode: (mode: GameMode, view: AppView) => void;
-  onLeaveOnlineRoom: () => void;
   onOpenTutorial?: () => void;
   onOpenMatchHistory?: () => void;
 }
@@ -36,9 +32,7 @@ export const HubView: React.FC<HubViewProps> = ({
   offlineState,
   onResumeLocalMatch,
   onClearLocalSession,
-  room,
   onSelectMode,
-  onLeaveOnlineRoom,
   onOpenTutorial,
   onOpenMatchHistory,
 }) => {
@@ -126,61 +120,11 @@ export const HubView: React.FC<HubViewProps> = ({
             </div>
           </div>
         )}
-
-        {room && (
-          <div className="w-full bg-black/60 border border-red-500/40 rounded-2xl p-4 shadow-xl flex items-center justify-between">
-            <div>
-              <span className="text-[10px] font-bold text-red-400 uppercase tracking-widest block">
-                Active Online Room
-              </span>
-              <h3 className="text-sm font-bold text-white">
-                Code: <span className="text-amber-400 font-mono font-black">{room.roomCode}</span> ({room.players.length}/4)
-              </h3>
-            </div>
-            <div className="flex items-center space-x-2">
-              <button
-                id="resume-online-btn"
-                onClick={() => onSelectMode('ONLINE', 'GAME')}
-                className="px-3.5 py-2 bg-red-600 hover:bg-red-500 text-white font-black text-xs rounded-xl shadow-[0_0_15px_rgba(220,38,38,0.4)] uppercase cursor-pointer"
-              >
-                Enter Room
-              </button>
-              <button
-                id="leave-online-room-btn"
-                onClick={onLeaveOnlineRoom}
-                className="px-2 py-2 bg-white/5 hover:bg-white/10 text-slate-400 text-xs rounded-xl border border-white/10 cursor-pointer"
-                title="Leave Room"
-              >
-                ✕
-              </button>
-            </div>
-          </div>
-        )}
       </div>
 
       {/* Mode Trigger Cards */}
       <div className="w-full space-y-3">
-        {/* 1. Online Multiplayer Mode */}
-        <HubModeCard
-          id="select-online-mode-btn"
-          onClick={() => onSelectMode('ONLINE', 'ONLINE_LOBBY')}
-          borderColorClass="border-red-500/30"
-          hoverBorderColorClass="hover:border-red-500"
-          iconBgClass="bg-red-950/80"
-          iconBorderClass="border-red-800/80"
-          iconColorClass="text-red-400"
-          titleHoverColorClass="group-hover:text-red-400"
-          badgeBgClass="bg-red-950/80"
-          badgeTextColorClass="text-red-300"
-          badgeBorderClass="border-red-800/60"
-          icon={<Users className="w-6 h-6" />}
-          titleNumber="1"
-          titleText="Online Multiplayer"
-          badgeLabel="PVP"
-          description="Real-time lobby via Firebase. Requires exactly 4 real human players with room code."
-        />
-
-        {/* 2. Single Player Mode vs AI */}
+        {/* 1. Single Player Mode vs AI */}
         <HubModeCard
           id="select-single-player-mode-btn"
           onClick={() => onSelectMode('SINGLE_PLAYER', 'SINGLE_PLAYER_SETUP')}
@@ -194,13 +138,13 @@ export const HubView: React.FC<HubViewProps> = ({
           badgeTextColorClass="text-purple-300"
           badgeBorderClass="border-purple-800/60"
           icon={<Bot className="w-6 h-6" />}
-          titleNumber="2"
+          titleNumber="1"
           titleText="Single Player"
           badgeLabel="BOTS"
           description="Instant offline match with 3 automated AI bots. Choose Easy, Medium, or Hard."
         />
 
-        {/* 3. Pass & Play Offline Mode */}
+        {/* 2. Pass & Play Offline Mode */}
         <HubModeCard
           id="select-pass-play-mode-btn"
           onClick={() => onSelectMode('OFFLINE', 'OFFLINE_SETUP')}
@@ -214,7 +158,7 @@ export const HubView: React.FC<HubViewProps> = ({
           badgeTextColorClass="text-green-300"
           badgeBorderClass="border-green-800/60"
           icon={<Smartphone className="w-6 h-6" />}
-          titleNumber="3"
+          titleNumber="2"
           titleText="Pass & Play"
           badgeLabel="1 DEVICE"
           description="Turn-passing on 1 shared device using PassShield privacy hand overlays."

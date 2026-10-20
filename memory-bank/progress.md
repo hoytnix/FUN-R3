@@ -29,7 +29,6 @@
 
 | Refactored Target | Initial Size | Final Size | Subcomponents / Extracted Modules |
 | :--- | :---: | :---: | :--- |
-| **`hooks/useOnlineRoomSession.ts`** | ~800 LOC | ~180 LOC | `useOnlineLobbyActions.ts`, `useOnlineRoomActions.ts` |
 | **`lib/replay-logger.ts`** | ~500 LOC | ~220 LOC | `lib/replay/replay-hash.ts`, `lib/replay/replay-storage.ts` |
 | **`app/page.tsx`** | ~1200 LOC | ~250 LOC | `GlobalModalOrchestrator.tsx`, `useOfflineGameSession.ts` |
 | **`components/tutorial/OnboardingSandbox.tsx`** | ~550 LOC | ~200 LOC | `TutorialGuideModal.tsx`, `TutorialBoardStage.tsx` |
@@ -86,4 +85,4 @@
 | **Play-by-Play Commentator (`commentator-engine.ts`)** | ✅ Complete | Game state evaluator triggering live commentary on Hearts penalties, Royal Suite captures, Round 3 Sudden Death Queen of Hearts, Solitaire placements, and leaderboard shifts. |
 | **Emoticon Laughing Emoji Button (`ChatReactions.tsx`)** | ✅ Complete | Prominent Laughing Emoji `🤣` button positioned directly above hand cards across ALL game modes with quick reaction chips and offline voice taunts. |
 | **Navigator Vibrate Haptics (`lib/audio.ts`)** | ✅ Complete | Tactile haptic feedback patterns for card plays (`15ms`), trick wins (`[30, 50, 30]ms`), turn alerts (`[20, 40, 20]ms`), and victory (`[50, 100, 50, 100, 100]ms`). |
-| **Firestore Synchronization (`firebase.ts`)**| ✅ Complete | Firestore real-time room listeners (`onSnapshot`) and rule enforcement. |
+| **Standalone Client-Side SPA (`next.config.ts`)**| ✅ Complete | 100% offline static export (`output: 'export'`) with unoptimized images for GitHub Pages. |

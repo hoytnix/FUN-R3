@@ -74,7 +74,7 @@ Online multiplayer relies on a **Host Authority Model** using Firebase Firestore
 * **Confetti Celebration (`canvas-confetti`):** Triggered upon match completion for the low-score winner.
 
 ### 3. State Management Hooks & Utilities
-* `useOnlineRoomSession.ts`: Manages online Firestore subscriptions, room creation, joining, card execution, and bot automation loops.
+* `hooks/useOfflineGameSession.ts`: Manages offline Pass & Play game state, privacy hand shield toggling, and turn transitions.
 * `lib/offline-engine.ts`: Pure local state manager handling offline Pass & Play state transitions without network calls.
 * `lib/rules/single-player-engine.ts`: Initializes and manages single-player room state vs 3 bot seats.
 * `lib/replay-logger.ts`: Captures step-by-step game actions with 32-bit FNV-1a state hashes (`computeStateHash`).

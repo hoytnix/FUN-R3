@@ -1,13 +1,11 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { Settings, HelpCircle, Trophy, Share2, Check, Shield, History, WifiOff } from 'lucide-react';
-import { RoomState } from '@/lib/types';
+import React from 'react';
+import { Settings, HelpCircle, Trophy, Shield, History } from 'lucide-react';
 
 interface HeaderProps {
-  room?: RoomState;
+  currentRound?: number;
   isOffline?: boolean;
-  isMultiplayer?: boolean;
   currentView?: string;
   onOpenRules: () => void;
   onOpenScoreboard: () => void;
@@ -17,9 +15,8 @@ interface HeaderProps {
 }
 
 export const Header: React.FC<HeaderProps> = ({
-  room,
+  currentRound,
   isOffline = false,
-  isMultiplayer = false,
   currentView = 'HUB',
   onOpenRules,
   onOpenScoreboard,
@@ -27,37 +24,7 @@ export const Header: React.FC<HeaderProps> = ({
   onToggleHideHand,
   onOpenSettings,
 }) => {
-  const [copied, setCopied] = useState(false);
-  const [isNetworkOnline, setIsNetworkOnline] = useState<boolean>(() => {
-    if (typeof window !== 'undefined') {
-      return navigator.onLine;
-    }
-    return true;
-  });
-
-  useEffect(() => {
-    const handleOnline = () => setIsNetworkOnline(true);
-    const handleOffline = () => setIsNetworkOnline(false);
-
-    window.addEventListener('online', handleOnline);
-    window.addEventListener('offline', handleOffline);
-
-    return () => {
-      window.removeEventListener('online', handleOnline);
-      window.removeEventListener('offline', handleOffline);
-    };
-  }, []);
-
   const isGameView = currentView === 'GAME' || currentView === 'SINGLE_PLAYER_GAME';
-  const isLobbyView = currentView === 'ONLINE_LOBBY';
-
-  const handleCopyLink = () => {
-    if (!room?.roomCode) return;
-    const url = `${window.location.origin}?room=${room.roomCode}`;
-    navigator.clipboard.writeText(url);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
 
   const getRoundLabel = (r?: number) => {
     switch (r) {
@@ -65,7 +32,7 @@ export const Header: React.FC<HeaderProps> = ({
       case 2: return 'R2: Royal Suite 👑';
       case 3: return 'R3: Queen Sudden Death 💀';
       case 4: return 'R4: Solitaire Race 🏎️';
-      default: return 'Lobby ⏳';
+      default: return 'Match In Progress ⏳';
     }
   };
 
@@ -84,14 +51,14 @@ export const Header: React.FC<HeaderProps> = ({
       </div>
 
       {/* Center Round & Trump Info */}
-      {isGameView && room && room.status !== 'LOBBY_WAITING' && (
+      {isGameView && currentRound && (
         <div className="hidden md:flex short:hidden items-center space-x-6">
           <div className="text-center">
             <p className="text-[10px] text-slate-400 uppercase tracking-widest">
-              Round {room.currentRound} of 4
+              Round {currentRound} of 4
             </p>
             <p className="text-xs font-bold text-red-400 italic uppercase">
-              {getRoundLabel(room.currentRound)}
+              {getRoundLabel(currentRound)}
             </p>
           </div>
           <div className="h-8 w-[1px] bg-white/10" />
@@ -102,24 +69,22 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
       )}
 
-      {/* Right Controls & Room Code */}
+      {/* Right Controls & Offline Mode Badge */}
       <div className="flex items-center space-x-1 sm:space-x-2">
-        {!isNetworkOnline && (
-          <div
-            id="offline-indicator-badge"
-            className="px-2 py-0.5 sm:px-2.5 sm:py-1 bg-amber-950/90 border border-amber-600/80 rounded-lg text-[10px] sm:text-xs font-mono font-bold text-amber-300 flex items-center space-x-1 shadow-sm"
-            title="PWA Offline Mode Active — Single Player vs Bots and Pass & Play work 100% offline!"
-          >
-            <WifiOff className="w-3 h-3 text-amber-400 animate-pulse" />
-            <span className="hidden xs:inline">OFFLINE MODE</span>
-          </div>
-        )}
+        <div
+          id="offline-indicator-badge"
+          className="px-2 py-0.5 sm:px-2.5 sm:py-1 bg-emerald-950/80 border border-emerald-600/60 rounded-lg text-[10px] sm:text-xs font-mono font-bold text-emerald-300 flex items-center space-x-1 shadow-sm"
+          title="Standalone Client-Side Mode — 100% Local State"
+        >
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+          <span className="hidden xs:inline">LOCAL</span>
+        </div>
 
         {isGameView && isOffline && onToggleHideHand && (
           <button
             id="hide-hand-header-btn"
             onClick={onToggleHideHand}
-            className="px-2 py-1 xs:px-2.5 xs:py-1.5 short:px-1.5 short:py-0.5 bg-red-950/80 hover:bg-red-900 border border-red-800 rounded-lg text-[10px] xs:text-xs font-bold text-red-300 flex items-center space-x-1 shadow-sm active:scale-95 transition-all"
+            className="px-2 py-1 xs:px-2.5 xs:py-1.5 short:px-1.5 short:py-0.5 bg-red-950/80 hover:bg-red-900 border border-red-800 rounded-lg text-[10px] xs:text-xs font-bold text-red-300 flex items-center space-x-1 shadow-sm active:scale-95 transition-all cursor-pointer"
             title="Cover Screen / Hide Hand"
           >
             <Shield className="w-3 h-3 xs:w-3.5 xs:h-3.5 text-red-400" />
@@ -127,33 +92,22 @@ export const Header: React.FC<HeaderProps> = ({
           </button>
         )}
 
-        {(isLobbyView || isGameView) && isMultiplayer && room?.roomCode && room.roomCode !== 'LOCAL' && (
+        {onOpenSettings && (
           <button
-            id="copy-room-code-btn"
-            onClick={handleCopyLink}
-            className="px-2 py-0.5 sm:px-3 sm:py-1 short:px-1.5 short:py-0.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-md text-[10px] sm:text-xs font-mono font-bold text-slate-200 transition-all flex items-center space-x-1 sm:space-x-1.5 shadow-sm active:scale-95"
-            title="Click to copy join link"
+            id="open-settings-btn"
+            onClick={onOpenSettings}
+            className="p-1.5 sm:p-2 short:p-1 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 hover:text-white transition-colors cursor-pointer"
+            title="Settings (Sound & Haptics)"
           >
-            <span className="text-slate-400 hidden sm:inline">ROOM:</span>
-            <span className="text-red-400 tracking-wider font-mono font-black">{room.roomCode}</span>
-            {copied ? <Check className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-green-400" /> : <Share2 className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-slate-400" />}
+            <Settings className="w-3.5 h-3.5 sm:w-4 sm:h-4 short:w-3 short:h-3 text-slate-200" />
           </button>
         )}
-
-        <button
-          id="open-settings-btn"
-          onClick={onOpenSettings}
-          className="p-1.5 sm:p-2 short:p-1 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 hover:text-white transition-colors"
-          title="Settings (Sound & Haptics)"
-        >
-          <Settings className="w-3.5 h-3.5 sm:w-4 sm:h-4 short:w-3 short:h-3 text-slate-200" />
-        </button>
 
         {onOpenMatchHistory && (
           <button
             id="open-match-history-btn"
             onClick={onOpenMatchHistory}
-            className="p-1.5 sm:p-2 short:p-1 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 hover:text-white transition-colors"
+            className="p-1.5 sm:p-2 short:p-1 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 hover:text-white transition-colors cursor-pointer"
             title="Match History & Replays"
           >
             <History className="w-3.5 h-3.5 sm:w-4 sm:h-4 short:w-3 short:h-3 text-red-400" />
@@ -163,17 +117,17 @@ export const Header: React.FC<HeaderProps> = ({
         <button
           id="open-rules-btn"
           onClick={onOpenRules}
-          className="p-1.5 sm:p-2 short:p-1 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 hover:text-white transition-colors"
+          className="p-1.5 sm:p-2 short:p-1 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 hover:text-white transition-colors cursor-pointer"
           title="View Rules"
         >
           <HelpCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4 short:w-3 short:h-3 text-amber-400" />
         </button>
 
-        {(isGameView || isLobbyView) && room && (
+        {isGameView && (
           <button
             id="open-scoreboard-btn"
             onClick={onOpenScoreboard}
-            className="p-1.5 sm:p-2 short:p-1 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 hover:text-white transition-colors"
+            className="p-1.5 sm:p-2 short:p-1 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 hover:text-white transition-colors cursor-pointer"
             title="Leaderboard"
           >
             <Trophy className="w-3.5 h-3.5 sm:w-4 sm:h-4 short:w-3 short:h-3 text-amber-400" />

@@ -8,7 +8,6 @@ import { ChatReactions } from '@/components/ChatReactions';
 import { RoomState, ChatMessage, FloatingReaction } from '@/lib/types';
 import { commentatorEngine, CommentatorStateSnapshot } from '@/lib/commentator-engine';
 import { BotDifficulty } from '@/lib/bot-engine';
-import { useOnlineRoomSession } from '@/hooks/useOnlineRoomSession';
 import { useOfflineGameSession } from '@/hooks/useOfflineGameSession';
 import { AppViewRouter, AppView, GameMode } from '@/components/views/AppViewRouter';
 import {
@@ -20,7 +19,7 @@ import { GlobalModalOrchestrator } from '@/components/views/GlobalModalOrchestra
 export default function Home() {
   const [view, setView] = useState<AppView>('HUB');
   const [isMounted, setIsMounted] = useState(false);
-  const [mode, setMode] = useState<GameMode>('ONLINE');
+  const [mode, setMode] = useState<GameMode>('SINGLE_PLAYER');
 
   // Single Player Setup State
   const [spName, setSpName] = useState<string>(() => {
@@ -38,7 +37,7 @@ export default function Home() {
   const [spDifficulty, setSpDifficulty] = useState<BotDifficulty>('MEDIUM');
   const [spRoom, setSpRoom] = useState<RoomState | null>(null);
 
-  // Online Room State & Id
+  // Local Player Id
   const [myPlayerId, setMyPlayerId] = useState<string>('player_guest');
 
   // Modals
@@ -48,25 +47,9 @@ export default function Home() {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isEmojiModalOpen, setIsEmojiModalOpen] = useState(false);
 
-  // Sessions
+  // Local Offline Game Session
   const offlineSession = useOfflineGameSession(mode, setMode, setView);
   const { offlineState } = offlineSession;
-
-  const {
-    room,
-    loading,
-    executeOnlineCardPlay,
-    handleOnlinePassSolitaire,
-    handleCreateRoom,
-    handleJoinRoom,
-    handleAddBot,
-    handleRemoveBot,
-    handleStartOnlineGame,
-    handleNextOnlineRound,
-    handleSendOnlineMessage,
-    handleSendOnlineReaction,
-    leaveOnlineRoom,
-  } = useOnlineRoomSession(myPlayerId, mode, () => setIsScoreboardOpen(true));
 
   // Tutorial Engine State
   const [tutorialState, tutorialDispatch] = useReducer(
@@ -95,24 +78,8 @@ export default function Home() {
     return () => clearTimeout(timer);
   }, []);
 
-  // Commentator State Observers
-  const prevRoomRef = useRef<CommentatorStateSnapshot | null>(null);
+  // Commentator State Observers for Local / Single Player Matches
   const prevOfflineRef = useRef<CommentatorStateSnapshot | null>(null);
-
-  useEffect(() => {
-    if (mode === 'ONLINE' && room) {
-      const currSnapshot: CommentatorStateSnapshot = {
-        status: room.status,
-        currentRound: room.currentRound,
-        players: room.players,
-        lastCompletedTrick: room.lastCompletedTrick,
-        totalScores: room.totalScores,
-        solitairePlacements: room.solitairePlacements || [],
-      };
-      commentatorEngine.observeGameState(prevRoomRef.current, currSnapshot);
-      prevRoomRef.current = currSnapshot;
-    }
-  }, [mode, room]);
 
   useEffect(() => {
     if ((mode === 'OFFLINE' || mode === 'SINGLE_PLAYER') && offlineState) {
@@ -139,32 +106,24 @@ export default function Home() {
   const [localReactions, setLocalReactions] = useState<FloatingReaction[]>([]);
 
   const handleSendReactionEmoji = (emoji: string) => {
-    if (mode === 'ONLINE') {
-      handleSendOnlineReaction(emoji);
-    } else {
-      const newReaction: FloatingReaction = {
-        id: Math.random().toString(),
-        playerId: myPlayerId || 'local_user',
-        emoji,
-        timestamp: Date.now(),
-      };
-      setLocalReactions((prev) => [...prev.slice(-10), newReaction]);
-    }
+    const newReaction: FloatingReaction = {
+      id: Math.random().toString(),
+      playerId: myPlayerId || 'local_user',
+      emoji,
+      timestamp: Date.now(),
+    };
+    setLocalReactions((prev) => [...prev.slice(-10), newReaction]);
   };
 
   const handleSendReactionOrMessage = (text: string) => {
-    if (mode === 'ONLINE') {
-      handleSendOnlineMessage(text);
-    } else {
-      const newMsg: ChatMessage = {
-        id: Math.random().toString(),
-        playerId: myPlayerId || 'local_user',
-        playerName: mode === 'SINGLE_PLAYER' ? (spName || 'You') : 'Player',
-        text,
-        timestamp: Date.now(),
-      };
-      setLocalChatMessages((prev) => [...prev.slice(-20), newMsg]);
-    }
+    const newMsg: ChatMessage = {
+      id: Math.random().toString(),
+      playerId: myPlayerId || 'local_user',
+      playerName: mode === 'SINGLE_PLAYER' ? (spName || 'You') : 'Player',
+      text,
+      timestamp: Date.now(),
+    };
+    setLocalChatMessages((prev) => [...prev.slice(-20), newMsg]);
   };
 
   // PWA Prompt
@@ -235,7 +194,7 @@ export default function Home() {
     (p) => p.seatIndex === offlineState.activeSeatIndex
   );
 
-  if (!isMounted || loading) {
+  if (!isMounted) {
     return (
       <div className="min-h-screen bg-[#050705] text-white flex flex-col items-center justify-center p-4 space-y-3 select-none">
         <div className="w-12 h-12 bg-red-600 rounded-xl flex items-center justify-center text-2xl font-bold shadow-[0_0_20px_rgba(220,38,38,0.5)] animate-bounce">
@@ -249,7 +208,7 @@ export default function Home() {
   }
 
   const isGameView = view === 'GAME' || view === 'SINGLE_PLAYER_GAME';
-  const activeRoom = mode === 'OFFLINE' ? activeOfflineRoomState : mode === 'SINGLE_PLAYER' ? spRoom : room;
+  const activeRoom = mode === 'OFFLINE' ? activeOfflineRoomState : spRoom;
 
   return (
     <div
@@ -261,9 +220,8 @@ export default function Home() {
       )}
     >
       <Header
-        room={activeRoom || undefined}
+        currentRound={activeRoom?.currentRound}
         isOffline={mode === 'OFFLINE'}
-        isMultiplayer={mode === 'ONLINE' && (view === 'ONLINE_LOBBY' || (view === 'GAME' && mode === 'ONLINE'))}
         currentView={view}
         onOpenRules={() => setIsRulesOpen(true)}
         onOpenScoreboard={() => setIsScoreboardOpen(true)}
@@ -283,11 +241,9 @@ export default function Home() {
         offlineState={offlineState}
         onResumeLocalMatch={offlineSession.handleResumeLocalMatch}
         onClearLocalSession={offlineSession.handleClearLocalSession}
-        room={room}
         spRoom={spRoom}
         setMode={setMode}
         setView={setView}
-        onLeaveOnlineRoom={leaveOnlineRoom}
         onOpenTutorial={() => tutorialDispatch({ type: 'OPEN_TUTORIAL' })}
         onOpenMatchHistory={() => setIsMatchHistoryOpen(true)}
         spName={spName}
@@ -304,12 +260,6 @@ export default function Home() {
         localTimerSeconds={localTimerSeconds}
         setLocalTimerSeconds={setLocalTimerSeconds}
         onStartLocalMatch={() => offlineSession.handleStartLocalMatch(localNames, localAvatars, localTimerSeconds)}
-        myPlayerId={myPlayerId}
-        onCreateRoom={handleCreateRoom}
-        onJoinRoom={handleJoinRoom}
-        onStartOnlineGame={handleStartOnlineGame}
-        onAddBot={handleAddBot}
-        onRemoveBot={handleRemoveBot}
         activeOfflineRoomState={activeOfflineRoomState}
         currentOfflinePlayer={currentOfflinePlayer}
         onPlayOfflineCard={(card) => offlineSession.playOfflineCard(card, currentOfflinePlayer)}
@@ -318,17 +268,14 @@ export default function Home() {
         onToggleOfflineShield={offlineSession.toggleOfflineShield}
         onDismissOfflineShield={offlineSession.dismissOfflineShield}
         onInitOfflineGame={() => offlineSession.handleStartLocalMatch(localNames, localAvatars, localTimerSeconds)}
-        executeOnlineCardPlay={executeOnlineCardPlay}
-        handleOnlinePassSolitaire={handleOnlinePassSolitaire}
-        handleNextOnlineRound={handleNextOnlineRound}
         isEmojiModalOpen={isEmojiModalOpen}
         onToggleEmojiModal={() => setIsEmojiModalOpen(!isEmojiModalOpen)}
       />
 
       {isGameView && (
         <ChatReactions
-          messages={mode === 'ONLINE' && room ? room.chatMessages || [] : localChatMessages}
-          reactions={mode === 'ONLINE' && room ? room.reactions || [] : localReactions}
+          messages={localChatMessages}
+          reactions={localReactions}
           onSendMessage={handleSendReactionOrMessage}
           onSendReaction={handleSendReactionEmoji}
           isOpen={isEmojiModalOpen}
@@ -349,9 +296,7 @@ export default function Home() {
         myPlayerId={
           mode === 'OFFLINE'
             ? currentOfflinePlayer?.id || 'local-player-0'
-            : mode === 'SINGLE_PLAYER'
-            ? 'human_player'
-            : myPlayerId
+            : 'human_player'
         }
         tutorialState={tutorialState}
         tutorialDispatch={tutorialDispatch}

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from 'motion/react';
 import { RoomState, Card, Player } from '@/lib/types';
 import { soundEngine } from '@/lib/audio';
 import { getPlayableCards } from '@/lib/game-engine';

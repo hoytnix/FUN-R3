@@ -2,7 +2,7 @@
 
 import React, { useEffect, useCallback, useRef } from 'react';
 import confetti from 'canvas-confetti';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { Crown, PartyPopper } from 'lucide-react';
 import { soundEngine } from '@/lib/audio';
 

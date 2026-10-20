@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from 'motion/react';
 import { Search, X, Smile } from 'lucide-react';
 import { EMOJI_CATEGORIES, EMOJI_DICTIONARY } from '@/lib/emoji-data';
 import { soundEngine } from '@/lib/audio';

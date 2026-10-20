@@ -1,5 +1,5 @@
 import React from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from 'motion/react';
 import { RoomState, Card, Player, TrickCard } from '@/lib/types';
 import { PlayingCard } from '@/components/ui/PlayingCard';
 import { SolitaireBoardView } from '@/components/game/SolitaireBoardView';
